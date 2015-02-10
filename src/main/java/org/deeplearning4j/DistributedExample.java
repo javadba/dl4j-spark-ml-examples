@@ -95,7 +95,7 @@ public class DistributedExample {
 
         System.out.println("Initializing network");
         SparkDl4jMultiLayer master = new SparkDl4jMultiLayer(sc,conf);
-        DataSet d = new MnistDataSetIterator(100,60000).next();
+        DataSet d = new MnistDataSetIterator(60000,60000).next();
         List<DataSet> next = new ArrayList<>();
         for(int i = 0; i < d.numExamples(); i++)
             next.add(d.get(i).copy());

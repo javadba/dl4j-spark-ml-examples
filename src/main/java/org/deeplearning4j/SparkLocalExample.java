@@ -1,11 +1,14 @@
 package org.deeplearning4j;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.math3.random.MersenneTwister;
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.Function;
 import org.deeplearning4j.datasets.iterator.impl.MnistDataSetIterator;
+import org.deeplearning4j.distributions.Distributions;
+import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.models.featuredetectors.rbm.RBM;
 import org.deeplearning4j.nn.api.Layer;
 import org.deeplearning4j.nn.api.Model;
@@ -20,6 +23,7 @@ import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.optimize.api.IterationListener;
 import org.deeplearning4j.plot.NeuralNetPlotter;
+import org.deeplearning4j.plot.iterationlistener.NeuralNetPlotterIterationListener;
 import org.deeplearning4j.spark.canova.RDDMiniBatches;
 import org.deeplearning4j.spark.impl.multilayer.SparkDl4jMultiLayer;
 import org.nd4j.linalg.api.activation.Activations;
@@ -43,7 +47,7 @@ public class SparkLocalExample {
 
         // set to test mode
         SparkConf sparkConf = new SparkConf()
-                .setMaster("local[8]").set(SparkDl4jMultiLayer.AVERAGE_EACH_ITERATION,"true")
+                .setMaster("local[8]").set(SparkDl4jMultiLayer.AVERAGE_EACH_ITERATION,"false")
                 .set("spark.akka.frameSize", "100")
                 .setAppName("mnist");
 
@@ -53,13 +57,15 @@ public class SparkLocalExample {
 
 
         Map<Integer,OutputPreProcessor> preProcessorMap = new HashMap<>();
-        preProcessorMap.put(0,new BinomialSamplingPreProcessor());
-        int batchSize = 10000;
-        MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder().optimizationAlgo(OptimizationAlgorithm.ITERATION_GRADIENT_DESCENT)
-                .lossFunction(LossFunctions.LossFunction.RMSE_XENT).l2(2e-4).regularization(true)
-                .corruptionLevel(0.6).momentum(0.8).iterations(100)
-                .nIn(784).nOut(10).layerFactory(LayerFactories.getFactory(RBM.class)).weightInit(WeightInit.SIZE)
-                .batchSize(batchSize)
+        for(int i = 0; i < 3; i++)
+            preProcessorMap.put(i,new BinomialSamplingPreProcessor());
+
+        int batchSize = 5000;
+        MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
+                .momentum(0.9).iterations(1)
+                .constrainGradientToUnitNorm(true).weightInit(WeightInit.DISTRIBUTION)
+                .dist(Distributions.normal(new MersenneTwister(123), 1e-4))
+                .nIn(784).nOut(10).layerFactory(LayerFactories.getFactory(RBM.class))
                 .list(4).hiddenLayerSizes(600, 500, 400)
                 .override(new NeuralNetConfiguration.ConfOverride() {
                     @Override
@@ -75,6 +81,7 @@ public class SparkLocalExample {
 
 
 
+
         MultiLayerNetwork network = new MultiLayerNetwork(conf);
         network.init();
         System.out.println("Initializing network");
@@ -86,6 +93,12 @@ public class SparkLocalExample {
 
         JavaRDD<DataSet> data = sc.parallelize(next);
         MultiLayerNetwork network2 = master.fitDataSet(data);
+
+        Evaluation evaluation = new Evaluation();
+        evaluation.eval(d.getLabels(),network2.output(d.getFeatureMatrix()));
+        System.out.println("Averaged once " + evaluation.stats());
+
+
         INDArray params = network2.params();
         Nd4j.writeTxt(params,"params.txt",",");
         FileUtils.writeStringToFile(new File("conf.json"),network2.getLayerWiseConfigurations().toJson());

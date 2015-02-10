@@ -20,15 +20,9 @@ public class TestModel {
 
     public static void main(String[] args) throws Exception {
         DataSet d = new MnistDataSetIterator(60000,60000).next();
-        MultiLayerNetwork averagedOnce = new MultiLayerNetwork(MultiLayerConfiguration.fromJson(FileUtils.readFileToString(new File("averageonce.ser.json"))));
-        String[] params = FileUtils.readFileToString(new File("averageonce.ser.params")).split(",");
+        MultiLayerNetwork averagedOnce = new MultiLayerNetwork(MultiLayerConfiguration.fromJson(FileUtils.readFileToString(new File("conf.json"))));
 
-        float[] data  = new float[params.length];
-        for(int i = 0; i < params.length; i++)
-            data[i] = Float.parseFloat(params[i]);
-
-        FloatBuffer buffer = new FloatBuffer(data);
-        INDArray params2 = Nd4j.create(buffer);
+        INDArray params2 = Nd4j.readTxt("params.txt",",");
         averagedOnce.init();
         averagedOnce.setParameters(params2);
         //MultiLayerNetwork averagedPerIteration = SerializationUtils.readObject(new File("net.averagedperiteration.ser"));

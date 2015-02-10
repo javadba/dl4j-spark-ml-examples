@@ -6,6 +6,7 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.deeplearning4j.datasets.iterator.impl.MnistDataSetIterator;
+import org.deeplearning4j.eval.Evaluation;
 import org.deeplearning4j.models.featuredetectors.rbm.RBM;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
@@ -101,6 +102,12 @@ public class DistributedExample {
         Collections.shuffle(next);
         JavaRDD<DataSet> data = sc.parallelize(next);
         MultiLayerNetwork network = master.fitDataSet(data);
+
+
+        Evaluation evaluation = new Evaluation();
+        evaluation.eval(d.getLabels(),network.output(d.getFeatureMatrix()));
+        System.out.println("Averaged once " + evaluation.stats());
+
 
         String json = conf.toJson();
         FileUtils.writeStringToFile(new File(app.outputPath + ".json"),json);

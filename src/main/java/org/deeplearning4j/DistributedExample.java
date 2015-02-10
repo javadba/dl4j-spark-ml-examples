@@ -80,7 +80,7 @@ public class DistributedExample {
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder().iterations(app.iterations).momentum(0.5)
                 .l2(2e-4).regularization(true).optimizationAlgo(OptimizationAlgorithm.ITERATION_GRADIENT_DESCENT)
                 .nIn(784).nOut(10).layerFactory(LayerFactories.getFactory(RBM.class)).batchSize(app.batchSize).momentumAfter(Collections.singletonMap(20,0.9))
-                .list(4).hiddenLayerSizes(600, 500, 400).preProcessors(preProcessorMap)
+                .list(4).hiddenLayerSizes(600, 500, 400)
                 .override(new NeuralNetConfiguration.ConfOverride() {
                     @Override
                     public void override(int i, NeuralNetConfiguration.Builder builder) {
@@ -101,6 +101,7 @@ public class DistributedExample {
             next.add(d.get(i).copy());
         Collections.shuffle(next);
         JavaRDD<DataSet> data = sc.parallelize(next);
+
         MultiLayerNetwork network = master.fitDataSet(data);
 
 

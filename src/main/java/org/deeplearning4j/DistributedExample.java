@@ -21,7 +21,9 @@ import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 import org.nd4j.linalg.api.activation.Activations;
+import org.nd4j.linalg.api.buffer.DataBuffer;
 import org.nd4j.linalg.dataset.DataSet;
+import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +48,10 @@ public class DistributedExample {
     @Option(name = "--avgiteration")
     private boolean averageEachIteration = false;
 
+
+
+
+
     private static Logger log = LoggerFactory.getLogger(DistributedExample.class);
 
     public DistributedExample(String[] args) {
@@ -69,7 +75,7 @@ public class DistributedExample {
                 .setAppName("mnist");
 
         System.out.println("Setting up Spark Context...");
-
+        Nd4j.dtype = DataBuffer.FLOAT;
         JavaSparkContext sc = new JavaSparkContext(sparkConf);
 
         Map<Integer,OutputPreProcessor> preProcessorMap = new HashMap<>();
@@ -79,7 +85,7 @@ public class DistributedExample {
 
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder().iterations(app.iterations).momentum(0.5)
                 .l2(2e-4).regularization(true).optimizationAlgo(OptimizationAlgorithm.ITERATION_GRADIENT_DESCENT)
-                .nIn(784).nOut(10).layerFactory(LayerFactories.getFactory(RBM.class)).batchSize(app.batchSize).momentumAfter(Collections.singletonMap(20,0.9))
+                .nIn(784).nOut(10).layerFactory(LayerFactories.getFactory(RBM.class)).batchSize(app.batchSize).momentumAfter(Collections.singletonMap(20, 0.9))
                 .list(4).hiddenLayerSizes(600, 500, 400)
                 .override(new NeuralNetConfiguration.ConfOverride() {
                     @Override

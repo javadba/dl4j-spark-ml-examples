@@ -12,19 +12,17 @@ import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.OutputPreProcessor;
+import org.deeplearning4j.nn.conf.override.ClassifierOverride;
 import org.deeplearning4j.nn.conf.preprocessor.BinomialSamplingPreProcessor;
-import org.deeplearning4j.nn.layers.OutputLayer;
 import org.deeplearning4j.nn.layers.factory.LayerFactories;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.spark.impl.multilayer.SparkDl4jMultiLayer;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
-import org.nd4j.linalg.api.activation.Activations;
 import org.nd4j.linalg.api.buffer.DataBuffer;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.lossfunctions.LossFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,16 +85,7 @@ public class DistributedExample {
                 .l2(2e-4).regularization(true).optimizationAlgo(OptimizationAlgorithm.ITERATION_GRADIENT_DESCENT)
                 .nIn(784).nOut(10).layerFactory(LayerFactories.getFactory(RBM.class)).batchSize(app.batchSize).momentumAfter(Collections.singletonMap(20, 0.9))
                 .list(4).hiddenLayerSizes(600, 500, 400)
-                .override(new NeuralNetConfiguration.ConfOverride() {
-                    @Override
-                    public void override(int i, NeuralNetConfiguration.Builder builder) {
-                        if (i == 3) {
-                            builder.activationFunction(Activations.softMaxRows());
-                            builder.layerFactory(LayerFactories.getFactory(OutputLayer.class));
-                            builder.lossFunction(LossFunctions.LossFunction.MCXENT);
-                        }
-                    }
-                }).build();
+                .override(new ClassifierOverride(3)).build();
 
 
         System.out.println("Initializing network");

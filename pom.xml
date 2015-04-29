@@ -140,6 +140,11 @@
     </dependency>
     <dependency>
       <groupId>org.deeplearning4j</groupId>
+      <artifactId>dl4j-spark-ml</artifactId>
+      <version>${dl4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.deeplearning4j</groupId>
       <artifactId>dl4j-spark</artifactId>
       <version>${dl4j.version}</version>
     </dependency>

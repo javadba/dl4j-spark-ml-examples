@@ -92,14 +92,12 @@ public class JavaIrisClassificationPipeline {
             .visibleUnit(RBM.VisibleUnit.GAUSSIAN)
             .hiddenUnit(RBM.HiddenUnit.RECTIFIED)
             .activationFunction("tanh").list(2).hiddenLayerSizes(3)
-            .override(new ConfOverride() {
+            .override(1, new ConfOverride() {
                 @Override
                 public void overrideLayer(int i, NeuralNetConfiguration.Builder builder) {
-                    if (i == 1) {
-                        builder.activationFunction("softmax");
-                        builder.layerFactory(LayerFactories.getFactory(OutputLayer.class));
-                        builder.lossFunction(LossFunctions.LossFunction.MCXENT);
-                    }
+                    builder.activationFunction("softmax");
+                    builder.layerFactory(LayerFactories.getFactory(OutputLayer.class));
+                    builder.lossFunction(LossFunctions.LossFunction.MCXENT);
                 }
             }).build();
 

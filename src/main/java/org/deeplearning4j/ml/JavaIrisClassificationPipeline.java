@@ -36,71 +36,75 @@ import org.deeplearning4j.nn.layers.factory.LayerFactories;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 /**
- * An iris classification pipeline using a neural network. 
- * Derived from {@link org.apache.spark.examples.ml.JavaSimpleTextClassificationPipeline JavaSimpleTextClassificationPipeline}.
- * Run with
+ * An iris classification pipeline using a neural network. Derived from
+ * {@link org.apache.spark.examples.ml.JavaSimpleTextClassificationPipeline
+ * JavaSimpleTextClassificationPipeline}. Run with
+ * 
  * <pre>
  * bin/run-example ml.JavaIrisClassificationPipeline
  * </pre>
  */
 public class JavaIrisClassificationPipeline {
 
-	public static void main(String[] args) {
-		SparkConf conf = new SparkConf().setAppName("Iris Classification Pipeline (Java)");
-	    SparkContext jsc = new SparkContext(conf);
-	    SQLContext jsql = new SQLContext(jsc);
-	    
-	    String path = args.length == 1 ? args[0] : "data/svmLight/iris_svmLight_0.txt";
-	    DataFrame data = jsql.createDataFrame(MLUtils.loadLibSVMFile(jsc, path), LabeledPoint.class);
-	    
-	    System.out.println("\nLoaded IRIS dataframe:");
-	    data.show(100);
-	    
-	    // prepare train/test set
-	    DataFrame trainingData = data.sample(false, 0.6, 11L);
-	    DataFrame testData = data.except(trainingData);
-	    
-	    // Configure an ML pipeline to train a model.   In this example, 
-	    // the pipeline combines Spark ML and DL4J elements.
-	    StandardScaler scaler = new StandardScaler()
-	      //.setWithMean(true).setWithStd(true) /* Spark 1.4 */
-	      .setInputCol("features")
-	      .setOutputCol("scaledFeatures");
-	    NeuralNetworkClassification classification = new NeuralNetworkClassification()
-	      .setFeaturesCol("scaledFeatures")
-	      .setConf(getConfiguration())
-	      .setWindowSize(1);
-	    Pipeline pipeline = new Pipeline()
-	      .setStages(new PipelineStage[] {scaler, classification});
-	    
-	    // Fit the pipeline on training data.
-	    System.out.println("\nTraining...");
-	    PipelineModel model = pipeline.fit(trainingData);
-	    
-	    // Make predictions on test data.
-	    System.out.println("\nTesting...");
-	    DataFrame predictions = model.transform(testData);
-	    
-	    System.out.println("\nTest Results:");
-	    predictions.show(100);
-	}
-	
-	private static MultiLayerConfiguration getConfiguration() {
-		MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
-        	.lossFunction(LossFunctions.LossFunction.RMSE_XENT)
-            .nIn(4).nOut(3).layerFactory(LayerFactories.getFactory(RBM.class))
-            .visibleUnit(RBM.VisibleUnit.GAUSSIAN)
-            .hiddenUnit(RBM.HiddenUnit.RECTIFIED)
-            .activationFunction("tanh").list(2).hiddenLayerSizes(3)
-            .override(1, new ConfOverride() {
-                @Override
-                public void overrideLayer(int i, NeuralNetConfiguration.Builder builder) {
-                    builder.activationFunction("softmax");
-                    builder.layerFactory(LayerFactories.getFactory(OutputLayer.class));
-                    builder.lossFunction(LossFunctions.LossFunction.MCXENT);
-                }
-            }).build();
+    public static void main(String[] args) {
+        SparkConf conf = new SparkConf()
+                .setAppName("Iris Classification Pipeline (Java)");
+        SparkContext jsc = new SparkContext(conf);
+        SQLContext jsql = new SQLContext(jsc);
 
-		return conf;
-	}
+        String path = args.length == 1 ? args[0]
+                : "data/svmLight/iris_svmLight_0.txt";
+        DataFrame data = jsql.createDataFrame(
+                MLUtils.loadLibSVMFile(jsc, path), LabeledPoint.class);
+
+        System.out.println("\nLoaded IRIS dataframe:");
+        data.show(100);
+
+        // prepare train/test set
+        DataFrame trainingData = data.sample(false, 0.6, 11L);
+        DataFrame testData = data.except(trainingData);
+
+        // Configure an ML pipeline to train a model. In this example,
+        // the pipeline combines Spark ML and DL4J elements.
+        StandardScaler scaler = new StandardScaler()
+        // .setWithMean(true).setWithStd(true) /* Spark 1.4 */
+                .setInputCol("features").setOutputCol("scaledFeatures");
+        NeuralNetworkClassification classification = new NeuralNetworkClassification()
+                .setFeaturesCol("scaledFeatures").setConf(getConfiguration())
+                .setWindowSize(1);
+        Pipeline pipeline = new Pipeline().setStages(new PipelineStage[] {
+                scaler, classification });
+
+        // Fit the pipeline on training data.
+        System.out.println("\nTraining...");
+        PipelineModel model = pipeline.fit(trainingData);
+
+        // Make predictions on test data.
+        System.out.println("\nTesting...");
+        DataFrame predictions = model.transform(testData);
+
+        System.out.println("\nTest Results:");
+        predictions.show(100);
+    }
+
+    private static MultiLayerConfiguration getConfiguration() {
+        MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
+                .lossFunction(LossFunctions.LossFunction.RMSE_XENT).nIn(4)
+                .nOut(3).layerFactory(LayerFactories.getFactory(RBM.class))
+                .visibleUnit(RBM.VisibleUnit.GAUSSIAN)
+                .hiddenUnit(RBM.HiddenUnit.RECTIFIED)
+                .activationFunction("tanh").list(2).hiddenLayerSizes(3)
+                .override(1, new ConfOverride() {
+                    @Override
+                    public void overrideLayer(int i,
+                            NeuralNetConfiguration.Builder builder) {
+                        builder.activationFunction("softmax");
+                        builder.layerFactory(LayerFactories
+                                .getFactory(OutputLayer.class));
+                        builder.lossFunction(LossFunctions.LossFunction.MCXENT);
+                    }
+                }).build();
+
+        return conf;
+    }
 }

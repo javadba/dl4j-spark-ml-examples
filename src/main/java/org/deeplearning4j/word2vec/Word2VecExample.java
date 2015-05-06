@@ -30,7 +30,7 @@ public class Word2VecExample {
         System.out.println("Setting up Spark Context...");
 
         JavaSparkContext sc = new JavaSparkContext(sparkConf);
-        JavaRDD<String> rdd = sc.textFile(new ClassPathResource("/raw_sentences.txt").getFile().toURI().toString());
+        JavaRDD<String> rdd = sc.textFile(new File(args[0]).toURI().toString());
         Word2Vec vec = new Word2Vec();
         Pair<VocabCache,WeightLookupTable> table = vec.train(rdd);
         SerializationUtils.saveObject(table,new File("table.ser"));

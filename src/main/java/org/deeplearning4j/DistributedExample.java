@@ -7,14 +7,13 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.deeplearning4j.datasets.iterator.impl.MnistDataSetIterator;
 import org.deeplearning4j.eval.Evaluation;
-import org.deeplearning4j.models.featuredetectors.rbm.RBM;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.OutputPreProcessor;
+import org.deeplearning4j.nn.conf.layers.RBM;
 import org.deeplearning4j.nn.conf.override.ClassifierOverride;
 import org.deeplearning4j.nn.conf.preprocessor.BinomialSamplingPreProcessor;
-import org.deeplearning4j.nn.layers.factory.LayerFactories;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.spark.impl.multilayer.SparkDl4jMultiLayer;
 import org.kohsuke.args4j.CmdLineException;
@@ -74,7 +73,7 @@ public class DistributedExample {
                 .setAppName("mnist");
 
         System.out.println("Setting up Spark Context...");
-        Nd4j.dtype = DataBuffer.FLOAT;
+        Nd4j.dtype = DataBuffer.Type.FLOAT;
         Nd4j.ENFORCE_NUMERICAL_STABILITY = true;
         INDArray n = Nd4j.create(5);
 
@@ -90,9 +89,9 @@ public class DistributedExample {
                 .l2(2e-4).regularization(true)
                 .optimizationAlgo(OptimizationAlgorithm.ITERATION_GRADIENT_DESCENT)
                 .nIn(784).nOut(10)
-                .layerFactory(LayerFactories.getFactory(RBM.class)).batchSize(app.batchSize).momentumAfter(Collections.singletonMap(20, 0.9))
+                .layer(new RBM()).batchSize(app.batchSize).momentumAfter(Collections.singletonMap(20, 0.9))
                 .list(4).hiddenLayerSizes(600, 500, 400)
-                .override(new ClassifierOverride(3)).build();
+                .override(3, new ClassifierOverride(3)).build();
 
 
 

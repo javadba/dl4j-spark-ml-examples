@@ -7,13 +7,13 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.deeplearning4j.datasets.iterator.impl.MnistDataSetIterator;
 import org.deeplearning4j.eval.Evaluation;
-import org.deeplearning4j.models.featuredetectors.rbm.RBM;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.OutputPreProcessor;
+import org.deeplearning4j.nn.conf.distribution.NormalDistribution;
+import org.deeplearning4j.nn.conf.layers.RBM;
 import org.deeplearning4j.nn.conf.override.ClassifierOverride;
 import org.deeplearning4j.nn.conf.preprocessor.BinomialSamplingPreProcessor;
-import org.deeplearning4j.nn.layers.factory.LayerFactories;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.spark.impl.multilayer.SparkDl4jMultiLayer;
@@ -53,10 +53,10 @@ public class SparkLocalExample {
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .momentum(0.9).iterations(1)
                 .constrainGradientToUnitNorm(true).weightInit(WeightInit.DISTRIBUTION)
-                .dist(Nd4j.getDistributions().createNormal(0,1e-4))
-                .nIn(784).nOut(10).layerFactory(LayerFactories.getFactory(RBM.class))
+                .dist(new NormalDistribution(0,1e-4))
+                .nIn(784).nOut(10).layer(new RBM())
                 .list(4).hiddenLayerSizes(600, 500, 400)
-                .override(new ClassifierOverride(3)).build();
+                .override(3, new ClassifierOverride(3)).build();
 
 
 

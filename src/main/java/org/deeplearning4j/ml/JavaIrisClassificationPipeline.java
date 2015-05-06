@@ -27,12 +27,11 @@ import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.mllib.util.MLUtils;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.SQLContext;
-import org.deeplearning4j.models.featuredetectors.rbm.RBM;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
+import org.deeplearning4j.nn.conf.layers.OutputLayer;
+import org.deeplearning4j.nn.conf.layers.RBM;
 import org.deeplearning4j.nn.conf.override.ConfOverride;
-import org.deeplearning4j.nn.layers.OutputLayer;
-import org.deeplearning4j.nn.layers.factory.LayerFactories;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 /**
@@ -67,11 +66,11 @@ public class JavaIrisClassificationPipeline {
         // Configure an ML pipeline to train a model. In this example,
         // the pipeline combines Spark ML and DL4J elements.
         StandardScaler scaler = new StandardScaler()
-        // .setWithMean(true).setWithStd(true) /* Spark 1.4 */
+                // .setWithMean(true).setWithStd(true) /* Spark 1.4 */
                 .setInputCol("features").setOutputCol("scaledFeatures");
         NeuralNetworkClassification classification = new NeuralNetworkClassification()
                 .setFeaturesCol("scaledFeatures").setConf(getConfiguration())
-                .setWindowSize(1);
+                .setWindowSize(100);
         Pipeline pipeline = new Pipeline().setStages(new PipelineStage[] {
                 scaler, classification });
 
@@ -89,8 +88,9 @@ public class JavaIrisClassificationPipeline {
 
     private static MultiLayerConfiguration getConfiguration() {
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
+                .iterations(100)
                 .lossFunction(LossFunctions.LossFunction.RMSE_XENT).nIn(4)
-                .nOut(3).layerFactory(LayerFactories.getFactory(RBM.class))
+                .nOut(3).layer(new RBM())
                 .visibleUnit(RBM.VisibleUnit.GAUSSIAN)
                 .hiddenUnit(RBM.HiddenUnit.RECTIFIED)
                 .activationFunction("tanh").list(2).hiddenLayerSizes(3)
@@ -99,8 +99,7 @@ public class JavaIrisClassificationPipeline {
                     public void overrideLayer(int i,
                             NeuralNetConfiguration.Builder builder) {
                         builder.activationFunction("softmax");
-                        builder.layerFactory(LayerFactories
-                                .getFactory(OutputLayer.class));
+                        builder.layer(new OutputLayer());
                         builder.lossFunction(LossFunctions.LossFunction.MCXENT);
                     }
                 }).build();

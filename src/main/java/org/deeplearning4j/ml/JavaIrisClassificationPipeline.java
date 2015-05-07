@@ -69,8 +69,7 @@ public class JavaIrisClassificationPipeline {
                 // .setWithMean(true).setWithStd(true) /* Spark 1.4 */
                 .setInputCol("features").setOutputCol("scaledFeatures");
         NeuralNetworkClassification classification = new NeuralNetworkClassification()
-                .setFeaturesCol("scaledFeatures").setConf(getConfiguration())
-                .setWindowSize(100);
+                .setFeaturesCol("scaledFeatures").setConf(getConfiguration());
         Pipeline pipeline = new Pipeline().setStages(new PipelineStage[] {
                 scaler, classification });
 

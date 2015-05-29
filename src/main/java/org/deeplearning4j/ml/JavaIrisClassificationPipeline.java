@@ -25,6 +25,7 @@ import org.apache.spark.ml.classification.NeuralNetworkClassification;
 import org.apache.spark.ml.feature.StandardScaler;
 import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.mllib.util.MLUtils;
+import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.SQLContext;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
@@ -52,7 +53,7 @@ public class JavaIrisClassificationPipeline {
         SQLContext jsql = new SQLContext(jsc);
 
         String path = args.length == 1 ? args[0]
-                : "data/svmLight/iris_svmLight_0.txt";
+                : "file://" + System.getProperty("user.dir") + "/data/svmLight/iris_svmLight_0.txt";
         DataFrame data = jsql.createDataFrame(
                 MLUtils.loadLibSVMFile(jsc, path), LabeledPoint.class);
 
@@ -66,7 +67,7 @@ public class JavaIrisClassificationPipeline {
         // Configure an ML pipeline to train a model. In this example,
         // the pipeline combines Spark ML and DL4J elements.
         StandardScaler scaler = new StandardScaler()
-                // .setWithMean(true).setWithStd(true) /* Spark 1.4 */
+                .setWithMean(false).setWithStd(true)
                 .setInputCol("features").setOutputCol("scaledFeatures");
         NeuralNetworkClassification classification = new NeuralNetworkClassification()
                 .setFeaturesCol("scaledFeatures").setConf(getConfiguration());

@@ -42,9 +42,9 @@ else
   JAR_PATH="${EXAMPLES_DIR}/target"
 fi
 
-for f in "${JAR_PATH}"/spark-examples-*.jar; do
+for f in "${JAR_PATH}"/spark-ml-examples-*.jar; do
   if [[ ! -e "$f" ]]; then
-    echo "Failed to find Spark examples assembly in $FWDIR/lib or $FWDIR/target" 1>&2
+    echo "Failed to find Spark ML examples assembly in $FWDIR/lib or $FWDIR/target" 1>&2
     echo "You need to build the examples before running this program" 1>&2
     exit 1
   fi
@@ -57,4 +57,6 @@ EXAMPLE_MASTER=${MASTER:-"local[*]"}
 
 exec spark-shell \
   --jars "$SPARK_EXAMPLES_JAR" \
+  --driver-memory 2G \
+  --executor-memory 2G \
   -i "$EXAMPLE_SCRIPT" 

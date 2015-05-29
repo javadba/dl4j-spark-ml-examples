@@ -38,7 +38,7 @@ else
   echo "Usage: ./bin/run-example <example-class> [example-args]" 1>&2
   echo "  - set MASTER=XX to use a specific master" 1>&2
   echo "  - can use abbreviated example class name relative to org.deeplearning4j" 1>&2
-  echo "     (e.g. ml.JavaIrisClassificationPipeline, word2vec.Word2VecExample)" 1>&2
+  echo "     (e.g. ml.JavaIrisClassificationPipeline)" 1>&2
   exit 1
 fi
 
@@ -48,9 +48,9 @@ else
   JAR_PATH="${EXAMPLES_DIR}/target"
 fi
 
-for f in "${JAR_PATH}"/spark-examples-*.jar; do
+for f in "${JAR_PATH}"/spark-ml-examples-*.jar; do
   if [[ ! -e "$f" ]]; then
-    echo "Failed to find Spark examples assembly in $FWDIR/lib or $FWDIR/target" 1>&2
+    echo "Failed to find Spark ML examples assembly in $FWDIR/lib or $FWDIR/target" 1>&2
     echo "You need to build the examples before running this program" 1>&2
     exit 1
   fi
@@ -68,5 +68,7 @@ fi
 exec spark-submit \
   --master $EXAMPLE_MASTER \
   --class $EXAMPLE_CLASS \
+  --driver-memory 2G \
+  --executor-memory 2G \
   "$SPARK_EXAMPLES_JAR" \
   "$@"

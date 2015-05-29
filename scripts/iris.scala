@@ -10,7 +10,9 @@ import org.deeplearning4j.nn.conf.`override`.{ConfOverride}
 import org.deeplearning4j.nn.conf.layers.{RBM,OutputLayer}
 import org.nd4j.linalg.lossfunctions.{LossFunctions}
 
-val iris = MLUtils.loadLibSVMFile(sc, "data/svmLight/iris_svmLight_0.txt").toDF
+val shellDir = System.getProperty("user.dir")
+
+val iris = MLUtils.loadLibSVMFile(sc, s"file://$shellDir/data/svmLight/iris_svmLight_0.txt").toDF
 val irisTrain = iris.sample(false, 0.6, 11L)
 val irisTest = iris.except(irisTrain)
 

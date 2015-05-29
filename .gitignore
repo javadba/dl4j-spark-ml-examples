@@ -10,3 +10,5 @@ release.properties
 .settings/
 *.log
 metastore_db/
+.idea/
+*.iml

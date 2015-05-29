@@ -26,7 +26,7 @@ else
   echo "Usage: ./bin/shell <script>" 1>&2
   echo "  - set MASTER=XX to use a specific master" 1>&2
   echo "  - can use abbreviated script name relative to scripts/" 1>&2
-  echo "     (e.g. iris)" 1>&2
+  echo "     (e.g. iris, lfw)" 1>&2
   exit 1
 fi
 

@@ -39,12 +39,12 @@ import org.nd4j.linalg.lossfunctions.LossFunctions;
  * An iris classification pipeline using a neural network. Derived from
  * {@link org.apache.spark.examples.ml.JavaSimpleTextClassificationPipeline
  * JavaSimpleTextClassificationPipeline}. Run with
- * 
+ *
  * <pre>
- * bin/run-example ml.JavaIrisClassificationPipeline
+ * bin/run-example ml.JavaIrisClassification
  * </pre>
  */
-public class JavaIrisClassificationPipeline {
+public class JavaIrisClassification {
 
     public static void main(String[] args) {
         SparkConf conf = new SparkConf()
@@ -68,9 +68,11 @@ public class JavaIrisClassificationPipeline {
         // the pipeline combines Spark ML and DL4J elements.
         StandardScaler scaler = new StandardScaler()
                 .setWithMean(false).setWithStd(true)
-                .setInputCol("features").setOutputCol("scaledFeatures");
+                .setInputCol("features")
+                .setOutputCol("scaledFeatures");
         NeuralNetworkClassification classification = new NeuralNetworkClassification()
-                .setFeaturesCol("scaledFeatures").setConf(getConfiguration());
+                .setFeaturesCol("scaledFeatures")
+                .setConf(getConfiguration());
         Pipeline pipeline = new Pipeline().setStages(new PipelineStage[] {
                 scaler, classification });
 

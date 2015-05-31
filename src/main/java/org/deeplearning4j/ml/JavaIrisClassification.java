@@ -21,7 +21,7 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.ml.Pipeline;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.PipelineStage;
-import org.apache.spark.ml.classification.NeuralNetworkClassification;
+import org.deeplearning4j.spark.ml.classification.NeuralNetworkClassification;
 import org.apache.spark.ml.feature.StandardScaler;
 import org.apache.spark.mllib.regression.LabeledPoint;
 import org.apache.spark.mllib.util.MLUtils;
@@ -37,7 +37,7 @@ import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 /**
  * An iris classification pipeline using a neural network. Derived from
- * {@link org.apache.spark.examples.ml.JavaSimpleTextClassificationPipeline
+ * {@code org.apache.spark.examples.ml.JavaSimpleTextClassificationPipeline
  * JavaSimpleTextClassificationPipeline}. Run with
  *
  * <pre>

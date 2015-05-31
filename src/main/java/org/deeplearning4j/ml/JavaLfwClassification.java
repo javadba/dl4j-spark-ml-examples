@@ -59,12 +59,12 @@ public class JavaLfwClassification {
         // the pipeline combines Spark ML and DL4J elements.
         StringIndexer indexer = new StringIndexer()
                 .setInputCol("label")
-                .setOutputCol("nominalLabel");
+                .setOutputCol("labelIndex");
         StandardScaler scaler = new StandardScaler()
-                .setWithMean(false).setWithStd(true)
+                .setWithMean(true).setWithStd(true)
                 .setInputCol("features").setOutputCol("scaledFeatures");
         NeuralNetworkClassification classification = new NeuralNetworkClassification()
-                .setLabelCol("nominalLabel")
+                .setLabelCol("labelIndex")
                 .setFeaturesCol("scaledFeatures")
                 .setConf(getConfiguration(data));
         Pipeline pipeline = new Pipeline().setStages(new PipelineStage[] {

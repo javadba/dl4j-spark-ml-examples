@@ -21,11 +21,7 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.ml.Pipeline;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.PipelineStage;
-import org.deeplearning4j.spark.ml.classification.NeuralNetworkClassification;
 import org.apache.spark.ml.feature.StandardScaler;
-import org.apache.spark.mllib.regression.LabeledPoint;
-import org.apache.spark.mllib.util.MLUtils;
-import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.SQLContext;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
@@ -33,6 +29,8 @@ import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.conf.layers.RBM;
 import org.deeplearning4j.nn.conf.override.ConfOverride;
+import org.deeplearning4j.spark.ml.classification.NeuralNetworkClassification;
+import org.deeplearning4j.spark.sql.sources.iris.JavaIrisContext;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 /**
@@ -54,8 +52,7 @@ public class JavaIrisClassification {
 
         String path = args.length == 1 ? args[0]
                 : "file://" + System.getProperty("user.dir") + "/data/svmLight/iris_svmLight_0.txt";
-        DataFrame data = jsql.createDataFrame(
-                MLUtils.loadLibSVMFile(jsc, path), LabeledPoint.class);
+        DataFrame data = new JavaIrisContext(jsql).iris(path);
 
         System.out.println("\nLoaded IRIS dataframe:");
         data.show(100);
@@ -67,7 +64,7 @@ public class JavaIrisClassification {
         // Configure an ML pipeline to train a model. In this example,
         // the pipeline combines Spark ML and DL4J elements.
         StandardScaler scaler = new StandardScaler()
-                .setWithMean(false).setWithStd(true)
+                .setWithMean(true).setWithStd(true)
                 .setInputCol("features")
                 .setOutputCol("scaledFeatures");
         NeuralNetworkClassification classification = new NeuralNetworkClassification()

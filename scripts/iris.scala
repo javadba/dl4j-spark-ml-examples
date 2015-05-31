@@ -5,6 +5,7 @@ import org.apache.spark.ml.feature._
 import org.apache.spark.ml.Pipeline
 
 import org.deeplearning4j.spark.ml.classification.{NeuralNetworkClassification}
+import org.deeplearning4j.spark.sql.sources.iris._
 import org.deeplearning4j.nn.conf.{MultiLayerConfiguration,NeuralNetConfiguration}
 import org.deeplearning4j.nn.conf.`override`.{ConfOverride}
 import org.deeplearning4j.nn.conf.layers.{RBM,OutputLayer}
@@ -12,7 +13,8 @@ import org.nd4j.linalg.lossfunctions.{LossFunctions}
 
 val shellDir = System.getProperty("user.dir")
 
-val iris = MLUtils.loadLibSVMFile(sc, s"file://$shellDir/data/svmLight/iris_svmLight_0.txt").toDF
+val path = s"file://$shellDir/data/svmLight/iris_svmLight_0.txt"
+val iris = sqlContext.iris(path)
 val irisTrain = iris.sample(false, 0.6, 11L)
 val irisTest = iris.except(irisTrain)
 

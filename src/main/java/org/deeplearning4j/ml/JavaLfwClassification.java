@@ -5,24 +5,22 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.ml.Pipeline;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.PipelineStage;
-import org.deeplearning4j.spark.ml.classification.NeuralNetworkClassification;
+import org.apache.spark.ml.attribute.Attribute;
+import org.apache.spark.ml.attribute.NominalAttribute;
 import org.apache.spark.ml.feature.StandardScaler;
 import org.apache.spark.ml.feature.StringIndexer;
-import org.apache.spark.mllib.regression.LabeledPoint;
-import org.apache.spark.mllib.util.MLUtils;
-import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.SQLContext;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.distribution.NormalDistribution;
-import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.conf.layers.RBM;
 import org.deeplearning4j.nn.conf.override.ClassifierOverride;
-import org.deeplearning4j.nn.conf.override.ConfOverride;
+import org.deeplearning4j.nn.conf.rng.DefaultRandom;
 import org.deeplearning4j.nn.weights.WeightInit;
+import org.deeplearning4j.spark.ml.classification.NeuralNetworkClassification;
+import org.deeplearning4j.spark.sql.sources.lfw.JavaLfwContext;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
-import org.deeplearning4j.spark.sql.sources.lfw.*;
 /**
  * An LFW classification pipeline using a neural network. Derived from
  * {@code org.apache.spark.examples.ml.JavaSimpleTextClassificationPipeline
@@ -90,7 +88,6 @@ public class JavaLfwClassification {
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .layer(new RBM())
                 .nIn(28 * 28)
-                .nOut(numLabels)
                 .weightInit(WeightInit.DISTRIBUTION)
                 .dist(new NormalDistribution(1e-3, 1e-1))
                 .lossFunction(LossFunctions.LossFunction.RMSE_XENT)

@@ -44,7 +44,11 @@ public class JavaLfwClassification {
             return;
         }
         String path = args[0];
-        DataFrame data = new JavaLfwContext(jsql).lfw(path);
+        DataFrame data = new JavaLfwContext(jsql)
+                .lfw(path);
+
+        // cache all columns upfront
+        //data.cache();
 
         System.out.println("\nLoaded LFW dataframe:");
         data.show(100);
@@ -82,17 +86,16 @@ public class JavaLfwClassification {
 
     private static MultiLayerConfiguration getConfiguration(DataFrame dataset) {
 
-        //int numLabels = (int) dataset.select("label").count();
-        int numLabels = 20000;
-
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .layer(new RBM())
                 .nIn(28 * 28)
+                .nOut(0)
                 .weightInit(WeightInit.DISTRIBUTION)
                 .dist(new NormalDistribution(1e-3, 1e-1))
                 .lossFunction(LossFunctions.LossFunction.RMSE_XENT)
                 .constrainGradientToUnitNorm(true)
                 .learningRate(1e-3f)
+                .rng(new DefaultRandom(11L))
                 .list(4)
                 .hiddenLayerSizes(600, 250, 200)
                 .override(3, new ClassifierOverride())

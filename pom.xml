@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>org.deeplearning4j</groupId>
-  <artifactId>spark-ml-examples</artifactId>
+  <artifactId>dl4j-spark-ml-examples</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
@@ -144,6 +144,5 @@
       <artifactId>dl4j-spark-ml</artifactId>
       <version>${dl4j.version}</version>
     </dependency>
-
   </dependencies>
 </project>

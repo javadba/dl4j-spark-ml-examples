@@ -42,7 +42,7 @@ else
   JAR_PATH="${EXAMPLES_DIR}/target"
 fi
 
-for f in "${JAR_PATH}"/spark-ml-examples-*.jar; do
+for f in "${JAR_PATH}"/dl4j-spark-ml-examples-*.jar; do
   if [[ ! -e "$f" ]]; then
     echo "Failed to find Spark ML examples assembly in $FWDIR/lib or $FWDIR/target" 1>&2
     echo "You need to build the examples before running this program" 1>&2

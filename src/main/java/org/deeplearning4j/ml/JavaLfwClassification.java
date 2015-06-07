@@ -5,8 +5,6 @@ import org.apache.spark.SparkContext;
 import org.apache.spark.ml.Pipeline;
 import org.apache.spark.ml.PipelineModel;
 import org.apache.spark.ml.PipelineStage;
-import org.apache.spark.ml.attribute.Attribute;
-import org.apache.spark.ml.attribute.NominalAttribute;
 import org.apache.spark.ml.feature.StandardScaler;
 import org.apache.spark.ml.feature.StringIndexer;
 import org.apache.spark.sql.DataFrame;
@@ -19,7 +17,7 @@ import org.deeplearning4j.nn.conf.override.ClassifierOverride;
 import org.deeplearning4j.nn.conf.rng.DefaultRandom;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.spark.ml.classification.NeuralNetworkClassification;
-import org.deeplearning4j.spark.sql.sources.lfw.JavaLfwContext;
+import org.deeplearning4j.spark.sql.sources.lfw.DefaultSource;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 /**
  * An LFW classification pipeline using a neural network. Derived from
@@ -44,8 +42,9 @@ public class JavaLfwClassification {
             return;
         }
         String path = args[0];
-        DataFrame data = new JavaLfwContext(jsql)
-                .lfw(path);
+        DataFrame data = jsql.read()
+                .format(DefaultSource.class.getName())
+                .load(path);
 
         // cache all columns upfront
         //data.cache();

@@ -30,7 +30,7 @@ import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.conf.layers.RBM;
 import org.deeplearning4j.nn.conf.override.ConfOverride;
 import org.deeplearning4j.spark.ml.classification.NeuralNetworkClassification;
-import org.deeplearning4j.spark.sql.sources.iris.JavaIrisContext;
+import org.deeplearning4j.spark.sql.sources.iris.DefaultSource;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
 
 /**
@@ -52,7 +52,9 @@ public class JavaIrisClassification {
 
         String path = args.length == 1 ? args[0]
                 : "file://" + System.getProperty("user.dir") + "/data/svmLight/iris_svmLight_0.txt";
-        DataFrame data = new JavaIrisContext(jsql).iris(path);
+        DataFrame data = jsql.read()
+                .format(DefaultSource.class.getName())
+                .load(path);
 
         System.out.println("\nLoaded IRIS dataframe:");
         data.show(100);

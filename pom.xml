@@ -13,7 +13,6 @@
   <properties>
     <nd4j.version>0.0.3.5.5.5</nd4j.version>
     <dl4j.version>0.0.3.3.5.alpha2-SNAPSHOT</dl4j.version>
-    <hadoop.version>2.6.0</hadoop.version>
     <spark.version>1.4.0</spark.version>
   </properties>
 
@@ -117,11 +116,6 @@
       <artifactId>spark-mllib_2.10</artifactId>
       <version>${spark.version}</version>
       <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-client</artifactId>
-      <version>${hadoop.version}</version>
     </dependency>
     <dependency>
       <groupId>org.scala-lang</groupId>

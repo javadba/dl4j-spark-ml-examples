@@ -42,6 +42,9 @@ else
   exit 1
 fi
 
+: ${SPARK_HOME?"environment variable must be set."}
+PATH=$SPARK_HOME/bin:$PATH
+
 if [ -f "$FWDIR/RELEASE" ]; then
   JAR_PATH="${FWDIR}/lib"
 else

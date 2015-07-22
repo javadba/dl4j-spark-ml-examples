@@ -52,9 +52,8 @@ public class JavaMnistClassification {
         String labelsPath = args.length == 2 ? args[1]
                 : "file://" + System.getProperty("user.dir") + "/data/train-labels-idx1-ubyte";
         Map<String, String> params = new HashMap<String, String>();
-        params.put("images_file", imagesPath);
-        params.put("labels_file", labelsPath);
-        params.put("num_examples", String.valueOf(numSamples));
+        params.put("imagesPath", imagesPath);
+        params.put("labelsPath", labelsPath);
         DataFrame data = jsql.read().format(DefaultSource.class.getName())
                 .options(params).load();
 

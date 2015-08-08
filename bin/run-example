@@ -71,7 +71,7 @@ fi
 exec spark-submit \
   --master $EXAMPLE_MASTER \
   --class $EXAMPLE_CLASS \
-  --driver-memory 2G \
-  --executor-memory 2G \
+  --driver-memory 1G \
+  --executor-memory 4G \
   "$SPARK_EXAMPLES_JAR" \
   "$@"

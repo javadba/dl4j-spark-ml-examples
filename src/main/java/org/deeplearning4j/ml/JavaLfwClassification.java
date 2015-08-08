@@ -9,9 +9,11 @@ import org.apache.spark.ml.feature.StandardScaler;
 import org.apache.spark.ml.feature.StringIndexer;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.SQLContext;
+import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.distribution.NormalDistribution;
+import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.conf.layers.RBM;
 import org.deeplearning4j.nn.conf.override.ClassifierOverride;
 import org.deeplearning4j.nn.conf.rng.DefaultRandom;
@@ -29,6 +31,11 @@ import org.nd4j.linalg.lossfunctions.LossFunctions;
  * </pre>
  */
 public class JavaLfwClassification {
+
+    final static int rows = 28;
+    final static int columns = 28;
+    final static int seed = 123;
+    final static int AUTOMATIC = 0;
 
     public static void main(String[] args) {
         SparkConf conf = new SparkConf()
@@ -86,18 +93,19 @@ public class JavaLfwClassification {
     private static MultiLayerConfiguration getConfiguration(DataFrame dataset) {
 
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
-                .layer(new RBM())
-                .nIn(28 * 28)
-                .nOut(0)
-                .weightInit(WeightInit.DISTRIBUTION)
-                .dist(new NormalDistribution(1e-3, 1e-1))
-                .lossFunction(LossFunctions.LossFunction.RMSE_XENT)
+                .hiddenUnit(RBM.HiddenUnit.RECTIFIED)
+                .visibleUnit(RBM.VisibleUnit.GAUSSIAN)
+                .seed(seed)
+                .weightInit(WeightInit.XAVIER)
                 .constrainGradientToUnitNorm(true)
-                .learningRate(1e-3f)
-                .rng(new DefaultRandom(11L))
+                .optimizationAlgo(OptimizationAlgorithm.CONJUGATE_GRADIENT)
                 .list(4)
-                .hiddenLayerSizes(600, 250, 200)
-                .override(3, new ClassifierOverride())
+                .layer(0, new RBM.Builder().nIn(rows * columns).nOut(600).build())
+                .layer(1, new RBM.Builder().nIn(600).nOut(250).build())
+                .layer(2, new RBM.Builder().nIn(250).nOut(200).build())
+                .layer(3, new OutputLayer.Builder(LossFunctions.LossFunction.RMSE_XENT).activation("softmax")
+                        .nIn(200).nOut(AUTOMATIC).build())
+                .pretrain(true).backprop(false)
                 .build();
 
         return conf;

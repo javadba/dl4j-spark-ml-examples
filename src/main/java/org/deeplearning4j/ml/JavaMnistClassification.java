@@ -11,6 +11,7 @@ import org.apache.spark.sql.SQLContext;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
+import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.conf.layers.RBM;
 import org.deeplearning4j.nn.conf.override.ClassifierOverride;
 import org.deeplearning4j.nn.weights.WeightInit;
@@ -35,11 +36,9 @@ public class JavaMnistClassification {
 
     final static int numRows = 28;
     final static int numColumns = 28;
-    static int  outputNum = 10;
-    static int numSamples = 10000;
-    static int batchSize = 100;
-    static int iterations = 10;
-    static int seed = 123;
+    final static int outputNum = 10;
+    final static int iterations = 10;
+    final static int seed = 123;
 
     public static void main(String[] args) {
         SparkConf conf = new SparkConf()
@@ -84,23 +83,24 @@ public class JavaMnistClassification {
     }
 
     public static MultiLayerConfiguration getConfiguration() {
+
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
-                .layer(new RBM())
-                .nIn(numRows * numColumns)
-                .nOut(outputNum)
-                .weightInit(WeightInit.XAVIER)
                 .seed(seed)
-                .constrainGradientToUnitNorm(true)
-                .iterations(iterations)
-                .lossFunction(LossFunctions.LossFunction.RMSE_XENT)
-                .learningRate(1e-1f)
-                .momentum(0.5)
-                .momentumAfter(Collections.singletonMap(3, 0.9))
+                .weightInit(WeightInit.XAVIER)
                 .optimizationAlgo(OptimizationAlgorithm.CONJUGATE_GRADIENT)
+                .iterations(iterations).l1(1e-1).l2(1e-3).constrainGradientToUnitNorm(true)
+                .regularization(true)
+                .visibleUnit(RBM.VisibleUnit.BINARY)
+                .hiddenUnit(RBM.HiddenUnit.BINARY)
                 .list(4)
-                .hiddenLayerSizes(new int[]{500, 250, 200})
-                .override(3, new ClassifierOverride())
+                .layer(0, new RBM.Builder().nIn(numRows * numColumns).nOut(600).build())
+                .layer(1, new RBM.Builder().nIn(600).nOut(400).build())
+                .layer(2, new RBM.Builder().nIn(400).nOut(200).build())
+                .layer(3, new OutputLayer.Builder(LossFunctions.LossFunction.MCXENT).activation("softmax")
+                        .nIn(200).nOut(outputNum).build())
+                .pretrain(true).backprop(false)
                 .build();
+
         return conf;
     }
 }

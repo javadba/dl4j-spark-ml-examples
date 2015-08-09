@@ -24,11 +24,14 @@ import org.apache.spark.ml.PipelineStage;
 import org.apache.spark.ml.feature.StandardScaler;
 import org.apache.spark.sql.DataFrame;
 import org.apache.spark.sql.SQLContext;
+import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
+import org.deeplearning4j.nn.conf.Updater;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.conf.layers.RBM;
 import org.deeplearning4j.nn.conf.override.ConfOverride;
+import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.spark.ml.classification.NeuralNetworkClassification;
 import org.deeplearning4j.spark.sql.sources.iris.DefaultSource;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
@@ -88,22 +91,34 @@ public class JavaIrisClassification {
     }
 
     private static MultiLayerConfiguration getConfiguration() {
+
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
-                .iterations(100)
-                .lossFunction(LossFunctions.LossFunction.RMSE_XENT).nIn(4)
-                .nOut(3).layer(new RBM())
-                .visibleUnit(RBM.VisibleUnit.GAUSSIAN)
-                .hiddenUnit(RBM.HiddenUnit.RECTIFIED)
-                .activationFunction("tanh").list(2).hiddenLayerSizes(3)
-                .override(1, new ConfOverride() {
-                    @Override
-                    public void overrideLayer(int i,
-                            NeuralNetConfiguration.Builder builder) {
-                        builder.activationFunction("softmax");
-                        builder.layer(new OutputLayer());
-                        builder.lossFunction(LossFunctions.LossFunction.MCXENT);
-                    }
-                }).build();
+                .seed(11L) // Seed to lock in weight initialization for tuning
+                .iterations(100) // # training iterations predict/classify & backprop
+                .weightInit(WeightInit.XAVIER) // Weight initialization method
+                .activationFunction("relu") // Activation function type
+                .k(1) // # contrastive divergence iterations
+                .lossFunction(LossFunctions.LossFunction.RMSE_XENT) // Loss function type
+                .learningRate(1e-3f) // Optimization step size
+                .optimizationAlgo(OptimizationAlgorithm.LINE_GRADIENT_DESCENT) // Backprop method (calculate the gradients)
+                .momentum(0.9)
+                .updater(Updater.ADAGRAD)
+                .constrainGradientToUnitNorm(true)
+                .dropOut(0.5)
+                .useDropConnect(true)
+                .list(2) // # NN layers (does not count input layer)
+                .layer(0, new RBM.Builder(RBM.HiddenUnit.RECTIFIED, RBM.VisibleUnit.GAUSSIAN)
+                                .nIn(4) // # input nodes
+                                .nOut(3) // # fully connected hidden layer nodes. Add list if multiple layers.
+                                .build()
+                ) // NN layer type
+                .layer(1, new OutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
+                                .nIn(3) // # input nodes
+                                .nOut(3) // # output nodes
+                                .activation("softmax")
+                                .build()
+                ) // NN layer type
+                .build();
 
         return conf;
     }

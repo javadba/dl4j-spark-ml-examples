@@ -38,7 +38,7 @@ else
   echo "Usage: ./bin/run-example <example-class> [example-args]" 1>&2
   echo "  - set MASTER=XX to use a specific master" 1>&2
   echo "  - can use abbreviated example class name relative to org.deeplearning4j" 1>&2
-  echo "     (e.g. ml.JavaIrisClassification, ml.JavaLfwClassification)" 1>&2
+  echo "     (e.g. ml.JavaIrisClassification, ml.JavaLfwClassification, ml.JavaMnistClassification)" 1>&2
   exit 1
 fi
 
@@ -71,7 +71,7 @@ fi
 exec spark-submit \
   --master $EXAMPLE_MASTER \
   --class $EXAMPLE_CLASS \
-  --driver-memory 2G \
-  --executor-memory 2G \
+  --driver-memory 1G \
+  --executor-memory 4G \
   "$SPARK_EXAMPLES_JAR" \
   "$@"

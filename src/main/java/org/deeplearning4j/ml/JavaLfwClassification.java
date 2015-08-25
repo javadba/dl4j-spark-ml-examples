@@ -15,7 +15,6 @@ import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.distribution.NormalDistribution;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.conf.layers.RBM;
-import org.deeplearning4j.nn.conf.override.ClassifierOverride;
 import org.deeplearning4j.nn.conf.rng.DefaultRandom;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.spark.ml.classification.NeuralNetworkClassification;
@@ -93,17 +92,22 @@ public class JavaLfwClassification {
     private static MultiLayerConfiguration getConfiguration(DataFrame dataset) {
 
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
-                .hiddenUnit(RBM.HiddenUnit.RECTIFIED)
-                .visibleUnit(RBM.VisibleUnit.GAUSSIAN)
                 .seed(seed)
-                .weightInit(WeightInit.XAVIER)
                 .constrainGradientToUnitNorm(true)
                 .optimizationAlgo(OptimizationAlgorithm.CONJUGATE_GRADIENT)
                 .list(4)
-                .layer(0, new RBM.Builder().nIn(rows * columns).nOut(600).build())
-                .layer(1, new RBM.Builder().nIn(600).nOut(250).build())
-                .layer(2, new RBM.Builder().nIn(250).nOut(200).build())
-                .layer(3, new OutputLayer.Builder(LossFunctions.LossFunction.RMSE_XENT).activation("softmax")
+                .layer(0, new RBM.Builder(RBM.HiddenUnit.BINARY, RBM.VisibleUnit.BINARY)
+                        .weightInit(WeightInit.XAVIER)
+                        .nIn(rows * columns).nOut(600).build())
+                .layer(1, new RBM.Builder(RBM.HiddenUnit.BINARY, RBM.VisibleUnit.BINARY)
+                        .weightInit(WeightInit.XAVIER)
+                        .nIn(600).nOut(250).build())
+                .layer(2, new RBM.Builder(RBM.HiddenUnit.BINARY, RBM.VisibleUnit.BINARY)
+                        .weightInit(WeightInit.XAVIER)
+                        .nIn(250).nOut(200).build())
+                .layer(3, new OutputLayer.Builder(LossFunctions.LossFunction.RMSE_XENT)
+                        .weightInit(WeightInit.XAVIER)
+                        .activation("softmax")
                         .nIn(200).nOut(AUTOMATIC).build())
                 .pretrain(true).backprop(false)
                 .build();

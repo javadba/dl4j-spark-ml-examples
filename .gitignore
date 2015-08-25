@@ -12,3 +12,4 @@ release.properties
 metastore_db/
 .idea/
 *.iml
+build/

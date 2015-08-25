@@ -13,7 +13,6 @@ import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.conf.layers.RBM;
-import org.deeplearning4j.nn.conf.override.ClassifierOverride;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.spark.ml.classification.NeuralNetworkClassification;
 import org.deeplearning4j.spark.sql.sources.mnist.DefaultSource;
@@ -86,17 +85,22 @@ public class JavaMnistClassification {
 
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .seed(seed)
-                .weightInit(WeightInit.XAVIER)
                 .optimizationAlgo(OptimizationAlgorithm.CONJUGATE_GRADIENT)
                 .iterations(iterations).l1(1e-1).l2(1e-3).constrainGradientToUnitNorm(true)
                 .regularization(true)
-                .visibleUnit(RBM.VisibleUnit.BINARY)
-                .hiddenUnit(RBM.HiddenUnit.BINARY)
                 .list(4)
-                .layer(0, new RBM.Builder().nIn(numRows * numColumns).nOut(600).build())
-                .layer(1, new RBM.Builder().nIn(600).nOut(400).build())
-                .layer(2, new RBM.Builder().nIn(400).nOut(200).build())
-                .layer(3, new OutputLayer.Builder(LossFunctions.LossFunction.MCXENT).activation("softmax")
+                .layer(0, new RBM.Builder(RBM.HiddenUnit.BINARY, RBM.VisibleUnit.BINARY)
+                        .weightInit(WeightInit.XAVIER)
+                        .nIn(numRows * numColumns).nOut(600).build())
+                .layer(1, new RBM.Builder(RBM.HiddenUnit.BINARY, RBM.VisibleUnit.BINARY)
+                        .weightInit(WeightInit.XAVIER)
+                        .nIn(600).nOut(400).build())
+                .layer(2, new RBM.Builder(RBM.HiddenUnit.BINARY, RBM.VisibleUnit.BINARY)
+                        .weightInit(WeightInit.XAVIER)
+                        .nIn(400).nOut(200).build())
+                .layer(3, new OutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
+                        .weightInit(WeightInit.XAVIER)
+                        .activation("softmax")
                         .nIn(200).nOut(outputNum).build())
                 .pretrain(true).backprop(false)
                 .build();

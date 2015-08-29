@@ -11,8 +11,12 @@ import org.apache.spark.sql.SQLContext;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
 import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
+import org.deeplearning4j.nn.conf.layers.ConvolutionLayer;
 import org.deeplearning4j.nn.conf.layers.OutputLayer;
 import org.deeplearning4j.nn.conf.layers.RBM;
+import org.deeplearning4j.nn.conf.layers.SubsamplingLayer;
+import org.deeplearning4j.nn.conf.preprocessor.CnnToFeedForwardPreProcessor;
+import org.deeplearning4j.nn.conf.preprocessor.FeedForwardToCnnPreProcessor;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.deeplearning4j.spark.ml.classification.NeuralNetworkClassification;
 import org.deeplearning4j.spark.sql.sources.mnist.DefaultSource;
@@ -58,7 +62,7 @@ public class JavaMnistClassification {
         System.out.println("\nLoaded Mnist dataframe:");
         data.show(100);
 
-        DataFrame trainingData = data.sample(false, 0.6, 11L);
+        DataFrame trainingData = data.sample(false, 0.8, 123);
         DataFrame testData = data.except(trainingData);
 
         StandardScaler scaler = new StandardScaler()
@@ -83,26 +87,39 @@ public class JavaMnistClassification {
 
     public static MultiLayerConfiguration getConfiguration() {
 
+        final int numRows = 28;
+        final int numColumns = 28;
+        int nChannels = 1;
+        int outputNum = 10;
+        int numSamples = 2000;
+        int batchSize = 500;
+        int iterations = 10;
+        int seed = 123;
+
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .seed(seed)
-                .optimizationAlgo(OptimizationAlgorithm.CONJUGATE_GRADIENT)
-                .iterations(iterations).l1(1e-1).l2(1e-3).constrainGradientToUnitNorm(true)
-                .regularization(true)
-                .list(4)
-                .layer(0, new RBM.Builder(RBM.HiddenUnit.BINARY, RBM.VisibleUnit.BINARY)
+                .batchSize(batchSize)
+                .iterations(iterations)
+                .constrainGradientToUnitNorm(true)
+                .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
+                .list(3)
+                .layer(0, new ConvolutionLayer.Builder(10, 10)
+                        .nIn(nChannels)
+                        .nOut(6)
                         .weightInit(WeightInit.XAVIER)
-                        .nIn(numRows * numColumns).nOut(600).build())
-                .layer(1, new RBM.Builder(RBM.HiddenUnit.BINARY, RBM.VisibleUnit.BINARY)
-                        .weightInit(WeightInit.XAVIER)
-                        .nIn(600).nOut(400).build())
-                .layer(2, new RBM.Builder(RBM.HiddenUnit.BINARY, RBM.VisibleUnit.BINARY)
-                        .weightInit(WeightInit.XAVIER)
-                        .nIn(400).nOut(200).build())
-                .layer(3, new OutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
+                        .activation("relu")
+                        .build())
+                .layer(1, new SubsamplingLayer.Builder(SubsamplingLayer.PoolingType.MAX, new int[] {2,2})
+                        .build())
+                .layer(2, new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
+                        .nIn(150)
+                        .nOut(outputNum)
                         .weightInit(WeightInit.XAVIER)
                         .activation("softmax")
-                        .nIn(200).nOut(outputNum).build())
-                .pretrain(true).backprop(false)
+                        .build())
+                .inputPreProcessor(0, new FeedForwardToCnnPreProcessor(numRows, numColumns, 1))
+                .inputPreProcessor(2, new CnnToFeedForwardPreProcessor())
+                .backprop(true).pretrain(false)
                 .build();
 
         return conf;

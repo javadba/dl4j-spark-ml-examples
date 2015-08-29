@@ -42,8 +42,14 @@ else
   exit 1
 fi
 
-: ${SPARK_HOME?"environment variable must be set."}
-PATH=$SPARK_HOME/bin:$PATH
+if [ -n $SPARK_HOME ]; then
+  PATH=$SPARK_HOME/bin:$PATH
+fi
+
+if ! [ -x "$(command -v spark-submit)" ]; then
+  echo 'Error: spark-submit is not available; please ensure that Spark 1.4.x is on the PATH, or that SPARK_HOME is set.' >&2
+  exit
+fi
 
 if [ -f "$FWDIR/RELEASE" ]; then
   JAR_PATH="${FWDIR}/lib"

@@ -95,27 +95,30 @@ public class JavaIrisClassification {
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .seed(11L) // Seed to lock in weight initialization for tuning
                 .iterations(100) // # training iterations predict/classify & backprop
-                .weightInit(WeightInit.XAVIER) // Weight initialization method
-                .activationFunction("relu") // Activation function type
-                .k(1) // # contrastive divergence iterations
-                .lossFunction(LossFunctions.LossFunction.RMSE_XENT) // Loss function type
                 .learningRate(1e-3f) // Optimization step size
                 .optimizationAlgo(OptimizationAlgorithm.LINE_GRADIENT_DESCENT) // Backprop method (calculate the gradients)
                 .momentum(0.9)
-                .updater(Updater.ADAGRAD)
                 .constrainGradientToUnitNorm(true)
-                .dropOut(0.5)
                 .useDropConnect(true)
                 .list(2) // # NN layers (does not count input layer)
                 .layer(0, new RBM.Builder(RBM.HiddenUnit.RECTIFIED, RBM.VisibleUnit.GAUSSIAN)
                                 .nIn(4) // # input nodes
                                 .nOut(3) // # fully connected hidden layer nodes. Add list if multiple layers.
+                                .weightInit(WeightInit.XAVIER)
+                                .activation("relu")
+                                .lossFunction(LossFunctions.LossFunction.RMSE_XENT)
+                                .updater(Updater.ADAGRAD)
+                                .k(1) // # contrastive divergence iterations
+                                .dropOut(0.5)
                                 .build()
                 ) // NN layer type
                 .layer(1, new OutputLayer.Builder(LossFunctions.LossFunction.MCXENT)
                                 .nIn(3) // # input nodes
                                 .nOut(3) // # output nodes
                                 .activation("softmax")
+                                .weightInit(WeightInit.XAVIER)
+                                .updater(Updater.ADAGRAD)
+                                .dropOut(0.5)
                                 .build()
                 ) // NN layer type
                 .build();

@@ -1,7 +1,5 @@
 # dl4j-spark-ml-examples
 
-*These instructions are a work in progress, and will be updated soon when binary releases are available.*
-
 ## Examples
 This repository contains examples of using deeplearning4j with Spark ML.
 
@@ -15,6 +13,7 @@ A number of standalone example applications:
 
 1. ml.JavaIrisClassification
 2. ml.JavaLfwClassification
+3. ml.JavaMnistClassification (* broken in dl4j rc0)
 
 ## Compile
 1. Compile project with maven.

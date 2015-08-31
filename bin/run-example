@@ -75,6 +75,7 @@ if [[ ! $EXAMPLE_CLASS == org.deeplearning4j* ]]; then
 fi
 
 exec spark-submit \
+  --packages "deeplearning4j:dl4j-spark-ml:0.4-rc0" \
   --master $EXAMPLE_MASTER \
   --class $EXAMPLE_CLASS \
   --driver-memory 1G \

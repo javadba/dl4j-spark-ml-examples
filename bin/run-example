@@ -78,7 +78,7 @@ exec spark-submit \
   --packages "deeplearning4j:dl4j-spark-ml:0.4-rc0" \
   --master $EXAMPLE_MASTER \
   --class $EXAMPLE_CLASS \
-  --driver-memory 1G \
-  --executor-memory 4G \
+  --driver-memory 8G \
+  --executor-memory 8G \
   "$SPARK_EXAMPLES_JAR" \
   "$@"
